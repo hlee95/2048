@@ -1,0 +1,79 @@
+A version of the popular 2048 game written in Java. 
+No existing versions of 2048 were consulted while writing this program.
+Resources used: Oracle documentation and tutorials, stackoverflow.com
+
+700 lines of code
+5 days of working -- between 20-25 hours of total work
+
+To-Do
+*make nicer colors for the labels
+*change the border color to one that's not exactly the same as one of the tile colors
+*make the randomize() method work with the GUI
+*go through and clean up code, maybe move some stuff around to a Game.java class
+*add high-score capability -- maybe need to use an external file
+*add option to add player name when you win, save high score
+*have the message pop up instead of just appear in the top corner 
+*add an undo button, even if just to use to debug
+
+Organization
+
+Main.java
+	creates a board
+	creates a GUI from that board
+	runs the GUI
+	
+Board.java
+	all of the logic is in this class
+	creates 4x4 array
+	methods will take care of:
+		new game (clear, put 2 new random tiles)
+		inserting new random tiles 
+		moveUp, moveDown, moveLeft, moveRight
+		check if a move is valid
+		check if user has won/lost
+	*will add a randomize() method 
+	
+GUI.java
+	takes in a board
+	highest level container, BoxLayout
+	creates boardGUI, topbar, bottombar
+	creates a frame and adds all components
+	initially sets focus on boardGUI
+	
+BoardGUI.java
+	takes in a Board and a TopBar
+	creates an array of 16 Labels
+	methods:
+		initialize labels depending on start configuration of board
+		update labels depending on current configuration of board
+	key binding
+		creates Action objects: upAction, downAction, rightAction, leftAction 
+		enacts Actions when keyboard is pressed, using key binding
+		
+Label.java
+	takes in an int representing the number desired to be displayed on the label
+	has two arrays, one of numbers and one of colors; uses log base 2 to determine index
+	method:
+		setLabel(int) -- changes the color and text of the label, by converting int to int base 2 and using it as the index
+		
+TopBar.java
+	takes in a Board
+	has the score, moves and message labels
+	methods:
+		checkWinLose() will change the message and prevent further moves if the user has won or lost
+		set score and moves based on the corresponding variables in the Board
+		update() updates the score and the moves and the message
+		reset() updates and then sets message back to blank
+		
+BottomBar.java
+	takes in Board, BoardGUI and TopBar
+	has the NewGame button and the Randomize button
+	action listener on new game:
+		calls board.newGame()
+		boardGUI.update()
+		calls topbar.reset()
+	*will eventually add action listener on randomize that will call board.randomize()
+		
+	
+		
+	
