@@ -90,8 +90,8 @@ public class BoardGUI extends JPanel{ //action listener for the newGame button; 
 		UpAction = new AbstractAction("Move Up") {  
 		    public void actionPerformed(ActionEvent e)  
 		    {  
-		        if (board.isValidUp() && board.validMove) {
-			    	board.moveUp();
+		        if (board.isValid("up") && board.validMove) {
+			    	board.move("up");
 			        board.newRandomTile();
 			        updateLabels(); //update after moving and after a new tile appears
 			        topbar.update();
@@ -102,8 +102,8 @@ public class BoardGUI extends JPanel{ //action listener for the newGame button; 
 		DownAction = new AbstractAction("Move Down") {  
 		    public void actionPerformed(ActionEvent e)  
 		    {  
-		    	if (board.isValidDown() && board.validMove) {
-			    	board.moveDown();
+		    	if (board.isValid("down") && board.validMove) {
+			    	board.move("down");
 			        board.newRandomTile();
 			        updateLabels();
 			        topbar.update();
@@ -114,8 +114,8 @@ public class BoardGUI extends JPanel{ //action listener for the newGame button; 
 		RightAction = new AbstractAction("Move Right") {  
 		    public void actionPerformed(ActionEvent e)  
 		    {  
-		        if (board.isValidRight() && board.validMove) {
-			    	board.moveRight();
+		        if (board.isValid("right") && board.validMove) {
+			    	board.move("right");
 			        board.newRandomTile();
 			        updateLabels();
 			        topbar.update();
@@ -126,8 +126,8 @@ public class BoardGUI extends JPanel{ //action listener for the newGame button; 
 		LeftAction = new AbstractAction("Move Left") {  
 		    public void actionPerformed(ActionEvent e)  
 		    {  
-		    	if (board.isValidLeft() && board.validMove) {
-			        board.moveLeft();
+		    	if (board.isValid("left") && board.validMove) {
+			        board.move("left");
 			        board.newRandomTile();
 			        updateLabels();
 			        topbar.update();

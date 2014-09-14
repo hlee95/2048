@@ -10,7 +10,7 @@ public class GUI extends JPanel { //should show score; the board; a reset/new ga
 	BoardGUI boardGUI;
 	TopBar topbar; 
 	BottomBar bottombar;
-	JLabel empty1 = new JLabel(); //empty labels just for spacing 
+	JLabel empty1 = new JLabel(); //empty labels just for spacing on the sides of the border layout
 	JLabel empty2 = new JLabel();
 	
 	public GUI(Board inputBoard) {

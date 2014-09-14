@@ -35,12 +35,12 @@ public class Board {
 	}
 	
 	public void newRandomTile() { //sets one of the non-blank tiles to either a 2 or 4, with 50% probability
-		int number = choose24();
+		int number = choose2or4();
 		chooseBlank();
 		placeTile(pos, number);
 	}
 	
-	public int choose24() { 
+	public int choose2or4() { 
 		int choice = randInt(0,7); //randInt is inclusive
 		if (choice != 0) 
 			return 2;
@@ -91,264 +91,213 @@ public class Board {
 		while (!isValid(directions[dir])) {
 			dir = randInt(0,3);
 		}
-			move(directions[dir]);	
+			move(directions[dir]);
 	}
-	
-	//when the player makes a move, call one of 4 methods depending on the direction
-	public void move(String dir) { 
-		switch(dir) {
-		case "up":
-			moveUp();
-			break;
-		case "down":
-			moveDown();
-			break;
-		case "right":
-			moveRight();
-			break;
-		case "left":
-			moveLeft();
-			break;
-		default:
-			System.out.println("Error in choosing direction to move!");
-		}
-	}
-	
+
+	//validate that a move is legal before executing it 
 	public boolean isValid(String dir) {
 		switch(dir) {
+		
 		case "up":
-			return isValidUp();
+			//if it results in any doubling
+			for (int col = 0; col < 4; col ++) { 
+				for (int row = 1; row < 4; row ++)
+					if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) {
+						return true;
+					}
+			}
+			//if there's whitespace between two tiles;
+			for (int col = 0; col < 4; col ++)
+				for (int row = 0; row < 4; row ++)
+					if (BOARD[row][col] == 0)
+						for (int r = row+1; r < 4; r ++)
+							if (BOARD[r][col] != 0) {
+								return true;
+							}
+			return false;
+			
 		case "down":
-			return isValidDown();
-		case "right":
-			return isValidRight();
+			//check for doubles 
+			for (int col = 0; col < 4; col ++) //for each column
+				for (int row = 3; row > 0; row --)
+					if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) 
+						return true;
+			//check for extra whitespace
+			for (int col = 0; col < 4; col ++) 
+				for (int row = 3; row > 0; row --) 
+					if (BOARD[row][col] == 0) 
+						for (int r = row-1; r > -1; r --) 
+							if (BOARD[r][col] != 0)
+								return true;
+			return false;
+			
 		case "left":
-			return isValidLeft();
+			//if anything doubled
+			for (int row = 0; row < 4; row ++)
+				for (int col = 1; col < 4; col ++) 
+					if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0))
+						return true;
+			//if there's whitespace between two tiles
+			for (int row = 0; row < 4; row ++) 
+				for (int col = 0; col < 3; col ++) 
+					if (BOARD[row][col] == 0) 
+						for (int c = col+1; c < 4; c ++) 
+							if (BOARD[row][c] != 0)
+								return true;
+			return false;
+			
+		case "right":
+			//check if there are any possible doubles
+			for (int row = 0; row < 4; row ++) 
+				for (int col = 3; col > 0; col --)
+					if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0))
+						return true;
+			//check if any extra whitespace
+			for (int row = 0; row < 4; row ++) 
+				for (int col = 3; col > 0; col --) 
+					if (BOARD[row][col] == 0) 
+						for (int c = col-1; c > -1; c --)
+							if (BOARD[row][c] != 0)
+								return true;
+			return false;
+			
 		default:
 			return false;
 		}
 	}
-
-	//UP
-	public void moveUp() { //called when someone presses the up key
-		moves++;
-		removeBlanksUp(); //remove blank spaces and shift up
-		removeBlanksUp();
-		doubleUp(); //consolidate any doubles
-		removeBlanksUp(); //remove any more blank spaces and shift up again
+	
+	//when the player makes a move, call one of 4 methods depending on the direction
+	public void move(String dir) {
+		//remove blanks twice
+		removeBlanks(dir);
+		removeBlanks(dir);
+		//consolidate doubles 
+		doubleWhenPossible(dir);
+		//remove blanks again
+		removeBlanks(dir);			
 	}
 	
-	public boolean isValidUp() { //check if moving up is a valid move
-		//if it results in any doubling
-		for (int col = 0; col < 4; col ++) { 
-			for (int row = 1; row < 4; row ++)
-				if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) {
-					return true;
-				}
+	//removes any blank spaces in between tiles, in the direction specified by String dir 
+	public void removeBlanks(String dir) {
+		switch(dir) {
+		case "up":
+			for (int col = 0; col < 4; col ++) 
+				for (int row = 0; row < 3; row ++)
+					if (BOARD[row][col] == 0)
+						shift(dir, row,col); //shift up all tiles in the column
+			break;
+		case "down":
+			for (int col = 0; col < 4; col ++) 
+				for (int row = 3; row > 0; row --) 
+					if (BOARD[row][col] == 0) 
+						shift(dir, row, col); //shift down all tiles in the column
+			break;
+		case "left":
+			for (int row = 0; row < 4; row ++) 
+				for (int col = 0; col < 3; col ++) 
+					if (BOARD[row][col] == 0) 
+						shift(dir, row, col); //shift left all tiles in the row
+			break;
+		case "right":
+			for (int row = 0; row < 4; row ++) 
+				for (int col = 3; col > 0; col --) 
+					if (BOARD[row][col] == 0) 
+						shift(dir, row, col); //shift right all tiles in the row
+			break;
+		default:
+			System.out.println("remove blanks twice, input must be up, down, left or right");				
 		}
-		//if there's whitespace between two tiles;
-		for (int col = 0; col < 4; col ++)
-			for (int row = 0; row < 4; row ++)
-				if (BOARD[row][col] == 0)
-					for (int r = row+1; r < 4; r ++)
-						if (BOARD[r][col] != 0) {
-							return true;
-						}
-		return false;
 	}
 	
-	public void doubleUp() { //assumes all pairs are adjacent, because we've already called removeBlanks()
-		//System.out.println("double up " + moves);
-		for (int col = 0; col < 4; col ++) { //for each column
-			int row = 1;
-			while (row < 4) {
-				if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) {
-					score += dub(BOARD[row][col]);
-					BOARD[row-1][col] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
-					BOARD[row][col] = 0; //clear the other space
-					row ++; //skip a row so that we don't double consolidate and cause chain reactions
+	//shifts tiles one space in the direction specified by String dir
+	public void shift(String dir, int row, int col) {
+		switch (dir) {
+		case "up":
+			for (int r = row; r < 3; r ++) 
+				BOARD[r][col] = BOARD[r+1][col];
+			BOARD[3][col] = 0; //set last one to 0 because all others have been shifted
+			break;
+		case "down":
+			for (int r = row; r > 0; r --) 
+				BOARD[r][col] = BOARD[r-1][col];
+			BOARD[0][col] = 0; //set last one to 0 because all others have been shifted
+			break;
+		case "left":
+			for (int c = col; c < 3; c ++) 
+				BOARD[row][c] = BOARD[row][c+1];
+			BOARD[row][3] = 0; //set last one to 0 because all others have been shifted
+			break;
+		case "right":
+			for (int c = col; c > 0; c --) 
+				BOARD[row][c] = BOARD[row][c-1];
+			BOARD[row][0] = 0; //set last one to 0 because all others have been shifted
+			break;
+		default:
+			System.out.println("in shift method, input needs to be up, down, left or right");
+		}
+	}
+	//consolidates any two identical numbers in the direction specified by String dir 
+	public void doubleWhenPossible(String dir) {
+		switch(dir) {
+		case "up":
+			for (int col = 0; col < 4; col ++) { //for each column
+				int row = 1;
+				while (row < 4) {
+					if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) {
+						score += dub(BOARD[row][col]);
+						BOARD[row-1][col] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
+						BOARD[row][col] = 0; //clear the other space
+						row ++; //skip a row so that we don't double consolidate and cause chain reactions
+					}
+					row ++;
 				}
-				row ++;
 			}
-		}
-	}
-	
-	public void removeBlanksUp() {
-		for (int col = 0; col < 4; col ++) {
-			for (int row = 0; row < 3; row ++)
-				if (BOARD[row][col] == 0)
-					shiftUp(row,col);
-		}
-	}
-	
-	public void shiftUp(int row, int col) { //shift everything from row+1 to row, within a column
-		for (int r = row; r < 3; r ++) 
-			BOARD[r][col] = BOARD[r+1][col];
-		BOARD[3][col] = 0; //set last one to 0 because all others have been shifted
-	}
-	
-	
-	//LEFT
-	public void moveLeft() { //called when someone presses the left key
-		moves ++;
-		removeBlanksLeft(); //remove blank spaces and shift left
-		removeBlanksLeft();
-		doubleLeft(); //consolidate any doubles
-		removeBlanksLeft(); //remove any more blank spaces and shift left again
-	}
-	
-	public boolean isValidLeft() {
-		//if anything doubled
-		for (int row = 0; row < 4; row ++)
-			for (int col = 1; col < 4; col ++) 
-				if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0))
-					return true;
-		//if there's whitespace between two tiles
-		for (int row = 0; row < 4; row ++) 
-			for (int col = 0; col < 3; col ++) 
-				if (BOARD[row][col] == 0) 
-					for (int c = col+1; c < 4; c ++) 
-						if (BOARD[row][c] != 0)
-							return true;
-		return false;
-	}
-	
-	public void doubleLeft() { //assumes all pairs are adjacent, because we've already called removeBlanks()
-		//System.out.println("double left " + moves);
-		for (int row = 0; row < 4; row ++) { //for each row
-			int col = 1;
-			while (col < 4) {
-				if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0)) {
-					score += dub(BOARD[row][col]);
-					BOARD[row][col-1] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
-					BOARD[row][col] = 0; //clear the other space
-					col ++; //skip a column so that we don't double consolidate and cause chain reactions
+			break;
+		case "down":
+			for (int col = 0; col < 4; col ++) { //for each column
+				int row = 3;
+				while (row > 0) {
+					if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) {
+						score += dub(BOARD[row][col]);
+						BOARD[row][col] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
+						BOARD[row-1][col] = 0; //clear the other space
+						row --; //skip a row so that we don't double consolidate and cause chain reactions
+					}
+					row --;
 				}
-				col ++;
 			}
-		}
-	}
-	
-	public void removeBlanksLeft() {
-		for (int row = 0; row < 4; row ++) 
-			for (int col = 0; col < 3; col ++) 
-				if (BOARD[row][col] == 0) 
-					shiftLeft(row, col); //shift left all tiles in the column
-	}
-	
-	public void shiftLeft(int row, int col) { //shift everything from col+1 to col, within a row
-		for (int c = col; c < 3; c ++) 
-			BOARD[row][c] = BOARD[row][c+1];
-		BOARD[row][3] = 0; //set last one to 0 because all others have been shifted
-	}
-	
-	//DOWN
-	public void moveDown() { //called when someone presses the down key
-		moves ++;
-		removeBlanksDown(); //remove blank spaces and shift down
-		removeBlanksDown();
-		doubleDown(); //consolidate any doubles
-		removeBlanksDown(); //remove any more blank spaces and shift down again
-	}
-	
-	public boolean isValidDown() {
-		//check for doubles 
-		for (int col = 0; col < 4; col ++) //for each column
-			for (int row = 3; row > 0; row --)
-				if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) 
-					return true;
-		//check for extra whitespace
-		for (int col = 0; col < 4; col ++) 
-			for (int row = 3; row > 0; row --) 
-				if (BOARD[row][col] == 0) 
-					for (int r = row-1; r > -1; r --) 
-						if (BOARD[r][col] != 0)
-							return true;
-		return false;
-		
-	}
-	
-	public void doubleDown() { //assumes all pairs are adjacent, because we've already called removeBlanks()
-		//System.out.println("double down " + moves);
-		for (int col = 0; col < 4; col ++) { //for each column
-			int row = 3;
-			while (row > 0) {
-				if ((BOARD[row][col] == BOARD[row-1][col]) && (BOARD[row][col] != 0)) {
-					score += dub(BOARD[row][col]);
-					BOARD[row][col] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
-					BOARD[row-1][col] = 0; //clear the other space
-					row --; //skip a row so that we don't double consolidate and cause chain reactions
+			break;
+		case "left":
+			for (int row = 0; row < 4; row ++) { //for each row
+				int col = 1;
+				while (col < 4) {
+					if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0)) {
+						score += dub(BOARD[row][col]);
+						BOARD[row][col-1] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
+						BOARD[row][col] = 0; //clear the other space
+						col ++; //skip a column so that we don't double consolidate and cause chain reactions
+					}
+					col ++;
 				}
-				row --;
 			}
-		}
-	}
-	
-	public void removeBlanksDown() {
-		for (int col = 0; col < 4; col ++) 
-			for (int row = 3; row > 0; row --) 
-				if (BOARD[row][col] == 0) 
-					shiftDown(row, col); //shift down all tiles in the column
-	}
-	
-	public void shiftDown(int row, int col) { //shift everything from row-1 to row, within a column
-		for (int r = row; r > 0; r --) 
-			BOARD[r][col] = BOARD[r-1][col];
-		BOARD[0][col] = 0; //set last one to 0 because all others have been shifted
-	}
-	
-	//RIGHT 
-	public void moveRight() { //called when someone presses the right key
-		moves ++;
-		removeBlanksRight();
-		removeBlanksRight(); //remove blank spaces and shift right 
-		doubleRight(); //consolidate any doubles
-		removeBlanksRight(); //remove any more blank spaces and shift right again
-	}
-	
-	public boolean isValidRight() {
-		//check if there are any possible doubles
-		for (int row = 0; row < 4; row ++) 
-			for (int col = 3; col > 0; col --)
-				if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0))
-					return true;
-		//check if any extra whitespace
-		for (int row = 0; row < 4; row ++) 
-			for (int col = 3; col > 0; col --) 
-				if (BOARD[row][col] == 0) 
-					for (int c = col-1; c > -1; c --)
-						if (BOARD[row][c] != 0)
-							return true;
-		return false;	
-	}
-	
-	public void doubleRight() { //assumes all pairs are adjacent, because we've already called removeBlanks()
-		//System.out.println("double right " + moves);
-		for (int row = 0; row < 4; row ++) { //for each row
-			int col = 3;
-			while (col > 0) {
-				if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0)) {
-					score += dub(BOARD[row][col]);
-					BOARD[row][col] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
-					BOARD[row][col-1] = 0; //clear the other space
-					col --; //skip a row so that we don't double consolidate and cause chain reactions
+			break;
+		case "right":
+			for (int row = 0; row < 4; row ++) { //for each row
+				int col = 3;
+				while (col > 0) {
+					if ((BOARD[row][col] == BOARD[row][col-1]) && (BOARD[row][col] != 0)) {
+						score += dub(BOARD[row][col]);
+						BOARD[row][col] = dub(BOARD[row][col]); //consolidate into the space further in specified direction
+						BOARD[row][col-1] = 0; //clear the other space
+						col --; //skip a row so that we don't double consolidate and cause chain reactions
+					}
+					col --;
 				}
-				col --;
 			}
+			break;
+		default:
+			System.out.println("doubling, input must be up, down, left or right.");
 		}
-	}
-	
-	public void removeBlanksRight() {
-		for (int row = 0; row < 4; row ++) 
-			for (int col = 3; col > 0; col --) 
-				if (BOARD[row][col] == 0) 
-					shiftRight(row, col); //shift right all tiles in the row
-	}
-	
-	public void shiftRight(int row, int col) { //shift everything from col-1 to col, within a row
-		for (int c = col; c > 0; c --) 
-			BOARD[row][c] = BOARD[row][c-1];
-		BOARD[row][0] = 0; //set last one to 0 because all others have been shifted
 	}
 	
 	//conditions for game to end 
@@ -362,7 +311,7 @@ public class Board {
 	
 	public boolean checkLose() { //returns true if player has lost
 		//if no valid moves, you've lost (because it always checks for wins before checking for losses)
-		if (isValidUp() || isValidDown() || isValidRight() || isValidLeft())
+		if (isValid("up") || isValid("down") || isValid("left") || isValid("right"))
 			return false;
 		return true;
 	}
@@ -381,5 +330,4 @@ public class Board {
 	public int dub(int num) {
 		return num * 2;
 	}
-
 }

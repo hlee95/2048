@@ -55,9 +55,7 @@ public class BottomBar extends JPanel {
 		
 		cupcakeButton.addActionListener(new ActionListener() { //changes mode of game to normal or cupcake
 			public void actionPerformed(ActionEvent e) {
-				if (boardGUI.gameMode == "random") {
-					//do nothing
-				}else if (boardGUI.gameMode == "normal") {
+				if (boardGUI.gameMode == "random" || boardGUI.gameMode == "normal") {
 					boardGUI.gameMode = "cupcake";
 					boardGUI.updateLabels();
 					cupcakeButton.setText("Click for Normal Mode");
@@ -67,7 +65,7 @@ public class BottomBar extends JPanel {
 					cupcakeButton.setText("Click for Cupcake Mode");
 				}
 				
-				topbar.messageText.setText("  "); //clear the message if it's there 
+				//topbar.messageText.setText("  "); //clear the message if it's there 
 				boardGUI.requestFocus(true);//always give focus back to the board
 			}
 		});
